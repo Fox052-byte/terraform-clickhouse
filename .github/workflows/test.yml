@@ -69,7 +69,7 @@ jobs:
               "registry.terraform.io/fox052-byte/clickhouse" = "$HOME/.terraform.d/plugins"
             }
             direct {
-              exclude = ["registry.terraform.io/fox052-byte/clickhouse/*"]
+              exclude = ["registry.terraform.io/fox052-byte/clickhouse"]
             }
           }
           EOF
