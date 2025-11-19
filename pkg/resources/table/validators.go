@@ -2,6 +2,7 @@ package resourcetable
 
 import (
 	"fmt"
+	"strings"
 
 	v "github.com/go-playground/validator/v10"
 	hashicorpcty "github.com/hashicorp/go-cty/cty"
@@ -26,17 +27,53 @@ func ValidatePartitionBy(inValue any, p hashicorpcty.Path) diag.Diagnostics {
 }
 
 func ValidateType(inValue any, p hashicorpcty.Path) diag.Diagnostics {
-	validate := v.New()
 	value := inValue.(string)
-	uintTypes := "UInt8 UInt16 UInt32 UInt64 UInt128 UInt256 Int8 Int16 Int32 Int64 Int128 Int256 Float32 Float64"
-	otherTypes := "Bool String UUID Date Date32 DateTime DateTime64 LowCardinality JSON"
-	validation := fmt.Sprintf("oneof=%v %v", uintTypes, otherTypes)
+	baseType := value
+	if len(value) > 8 && value[:8] == "Nullable(" {
+		parenCount := 0
+		endIdx := -1
+		for i := 8; i < len(value); i++ {
+			if value[i] == '(' {
+				parenCount++
+			} else if value[i] == ')' {
+				if parenCount == 0 {
+					endIdx = i
+					break
+				}
+				parenCount--
+			}
+		}
+		if endIdx > 0 {
+			baseType = value[8:endIdx]
+		}
+	}
+	simpleType := baseType
+	if idx := strings.Index(baseType, "("); idx > 0 {
+		simpleType = baseType[:idx]
+	}
+	
+	allowedTypes := []string{
+		"UInt8", "UInt16", "UInt32", "UInt64", "UInt128", "UInt256",
+		"Int8", "Int16", "Int32", "Int64", "Int128", "Int256",
+		"Float32", "Float64",
+		"Bool", "String", "UUID", "Date", "Date32", "DateTime", "DateTime64",
+		"LowCardinality", "JSON", "Decimal",
+	}
+	
+	found := false
+	for _, allowedType := range allowedTypes {
+		if simpleType == allowedType {
+			found = true
+			break
+		}
+	}
+	
 	var diags diag.Diagnostics
-	if validate.Var(value, validation) != nil {
+	if !found {
 		diag := diag.Diagnostic{
 			Severity: diag.Error,
 			Summary:  "wrong value",
-			Detail:   fmt.Sprintf("%q is not %q %q", value, uintTypes, otherTypes),
+			Detail:   fmt.Sprintf("%q is not a valid type. Allowed types: %v", value, allowedTypes),
 		}
 		diags = append(diags, diag)
 	}
