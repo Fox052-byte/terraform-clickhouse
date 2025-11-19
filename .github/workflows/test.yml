@@ -50,11 +50,30 @@ jobs:
         with:
           go-version-file: "go.mod"
           cache: true
+      - name: Build provider binary
+        run: |
+          go build -o terraform-provider-clickhouse .
+          mkdir -p ~/.terraform.d/plugins/registry.terraform.io/fox052-byte/clickhouse/0.0.1/linux_amd64
+          mv terraform-provider-clickhouse ~/.terraform.d/plugins/registry.terraform.io/fox052-byte/clickhouse/0.0.1/linux_amd64/
       - name: Set up Terraform
         uses: hashicorp/setup-terraform@v2
         with:
           terraform_version: '1.6.6'
           terraform_wrapper: false
+      - name: Configure Terraform for local provider
+        run: |
+          mkdir -p ~/.terraform.d
+          cat > ~/.terraformrc <<EOF
+          provider_installation {
+            dev_overrides {
+              "registry.terraform.io/fox052-byte/clickhouse" = "$HOME/.terraform.d/plugins"
+            }
+            direct {
+              exclude = ["registry.terraform.io/fox052-byte/clickhouse/*"]
+            }
+          }
+          EOF
+          cat ~/.terraformrc
       - name: Debug terraform binary
         run: |
           which terraform
