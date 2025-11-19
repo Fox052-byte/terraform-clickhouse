@@ -29,25 +29,28 @@ func ValidatePartitionBy(inValue any, p hashicorpcty.Path) diag.Diagnostics {
 func ValidateType(inValue any, p hashicorpcty.Path) diag.Diagnostics {
 	value := inValue.(string)
 	baseType := value
-	if len(value) > 8 && value[:8] == "Nullable(" {
+	if len(value) > 9 && value[:9] == "Nullable(" {
 		parenCount := 0
 		endIdx := -1
-		for i := 8; i < len(value); i++ {
+		// Ищем закрывающую скобку для Nullable, учитывая вложенные скобки
+		for i := 9; i < len(value); i++ {
 			if value[i] == '(' {
 				parenCount++
 			} else if value[i] == ')' {
 				if parenCount == 0 {
+					// Нашли закрывающую скобку для Nullable
 					endIdx = i
 					break
 				}
 				parenCount--
 			}
 		}
-		if endIdx > 0 {
-			baseType = value[8:endIdx]
+		if endIdx >= 0 {
+			baseType = value[9:endIdx]
 		}
 	}
 	simpleType := baseType
+	// Извлекаем базовый тип, убирая параметры в скобках (например, Decimal(10, 2) -> Decimal)
 	if idx := strings.Index(baseType, "("); idx > 0 {
 		simpleType = baseType[:idx]
 	}
