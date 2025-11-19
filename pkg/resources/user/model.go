@@ -1,7 +1,7 @@
 package resourceuser
 
 import (
-	"github.com/Fox052-byte/terraform-clickhouse/pkg/common"
+	"github.com/Fox052-byte/terraform-provider-clickhouse/pkg/common"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 

@@ -6,12 +6,12 @@ import (
 	"regexp"
 	"testing"
 
-	"github.com/Fox052-byte/terraform-clickhouse/pkg/common"
-	resourcerole "github.com/Fox052-byte/terraform-clickhouse/pkg/resources/role"
+	"github.com/Fox052-byte/terraform-provider-clickhouse/pkg/common"
+	resourcerole "github.com/Fox052-byte/terraform-provider-clickhouse/pkg/resources/role"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
-	"github.com/Fox052-byte/terraform-clickhouse/pkg/testutils"
+	"github.com/Fox052-byte/terraform-provider-clickhouse/pkg/testutils"
 )
 
 const functionRoleName = "test_function_role"

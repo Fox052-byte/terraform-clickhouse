@@ -1,4 +1,4 @@
-module github.com/Fox052-byte/terraform-clickhouse
+module github.com/Fox052-byte/terraform-provider-clickhouse
 
 go 1.19
 
