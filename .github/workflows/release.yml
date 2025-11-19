@@ -47,6 +47,14 @@ jobs:
         with:
           gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
+      - name: Verify GPG key
+        run: |
+          echo "GPG Fingerprint: ${{ steps.import_gpg.outputs.fingerprint }}"
+          if [ -z "${{ steps.import_gpg.outputs.fingerprint }}" ]; then
+            echo "Error: GPG key import failed!"
+            exit 1
+          fi
+          gpg --list-secret-keys --keyid-format=long
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v6
         with:
