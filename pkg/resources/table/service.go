@@ -33,7 +33,7 @@ func (ts *CHTableService) GetDBTables(ctx context.Context, database string) ([]C
 }
 
 func (ts *CHTableService) GetTable(ctx context.Context, database string, table string) (*CHTable, error) {
-	query := fmt.Sprintf("SELECT database, name, engine_full, engine, comment FROM system.tables where database = '%s' and name = '%s'", database, table)
+	query := fmt.Sprintf("SELECT database, name, engine_full, engine, comment, create_table_query FROM system.tables where database = '%s' and name = '%s'", database, table)
 	row := (*ts.CHConnection).QueryRow(ctx, query)
 
 	if row.Err() != nil {

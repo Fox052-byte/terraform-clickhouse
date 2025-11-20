@@ -8,12 +8,13 @@ import (
 )
 
 type CHTable struct {
-	Database   string     `ch:"database"`
-	Name       string     `ch:"name"`
-	EngineFull string     `ch:"engine_full"`
-	Engine     string     `ch:"engine"`
-	Comment    string     `ch:"comment"`
-	Columns    []CHColumn `ch:"columns"`
+	Database        string     `ch:"database"`
+	Name            string     `ch:"name"`
+	EngineFull      string     `ch:"engine_full"`
+	Engine          string     `ch:"engine"`
+	Comment         string     `ch:"comment"`
+	CreateTableQuery string    `ch:"create_table_query"`
+	Columns         []CHColumn `ch:"columns"`
 }
 
 type CHColumn struct {
@@ -90,10 +91,16 @@ func (t *CHTable) ToResource() (*TableResource, error) {
 	tableResource.Comment = comment
 	tableResource.EngineParams = engineParams
 
-	orderByRegex := regexp.MustCompile(`ORDER BY\s+([^PARTITION\s]+?)(?:\s+PARTITION|\s+COMMENT|$)`)
-	orderByMatches := orderByRegex.FindStringSubmatch(t.EngineFull)
+	createQuery := t.CreateTableQuery
+	if createQuery == "" {
+		createQuery = t.EngineFull
+	}
+
+	orderByRegex := regexp.MustCompile(`(?i)ORDER\s+BY\s+([^(]+?)(?:\s+PARTITION|\s+COMMENT|\s+SETTINGS|$)`)
+	orderByMatches := orderByRegex.FindStringSubmatch(createQuery)
 	if len(orderByMatches) > 1 {
 		orderByStr := orderByMatches[1]
+		orderByStr = regexp.MustCompile(`^\(|\)$`).ReplaceAllString(orderByStr, "")
 		orderByStr = regexp.MustCompile(`\s+`).ReplaceAllString(orderByStr, " ")
 		orderByParts := regexp.MustCompile(`,\s*`).Split(orderByStr, -1)
 		tableResource.OrderBy = make([]string, 0)
@@ -105,8 +112,8 @@ func (t *CHTable) ToResource() (*TableResource, error) {
 		}
 	}
 
-	partitionByRegex := regexp.MustCompile(`PARTITION BY\s+([^COMMENT]+?)(?:\s+COMMENT|$)`)
-	partitionByMatches := partitionByRegex.FindStringSubmatch(t.EngineFull)
+	partitionByRegex := regexp.MustCompile(`(?i)PARTITION\s+BY\s+([^(]+?)(?:\s+ORDER|\s+COMMENT|\s+SETTINGS|$)`)
+	partitionByMatches := partitionByRegex.FindStringSubmatch(createQuery)
 	if len(partitionByMatches) > 1 {
 		partitionByStr := partitionByMatches[1]
 		partitionByStr = regexp.MustCompile(`\s+`).ReplaceAllString(partitionByStr, " ")
