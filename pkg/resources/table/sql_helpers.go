@@ -37,21 +37,14 @@ func buildOrderBySentence(orderBy []string) string {
 }
 
 func buildCreateOnClusterSentence(resource TableResource) (query string) {
-	// Формируем базовую часть CREATE TABLE
-	parts := []string{fmt.Sprintf("CREATE TABLE %s.%s", resource.Database, resource.Name)}
-	
-	// Добавляем ON CLUSTER если указан
+	parts := []string{fmt.Sprintf("CREATE TABLE %s.%s", resource.Database, resource.Name)}	
 	if resource.Cluster != "" {
 		parts = append(parts, common.GetClusterStatement(resource.Cluster))
-	}
-	
-	// Добавляем колонки
+	}	
 	if len(resource.Columns) > 0 {
 		columnsList := buildColumnsSentence(resource.GetColumnsResourceList())
 		parts = append(parts, "("+strings.Join(columnsList, ", ")+")")
-	}
-	
-	// Добавляем ENGINE
+	}	
 	if len(resource.EngineParams) > 0 {
 		engineParamsStr := strings.Join(resource.EngineParams, ", ")
 		parts = append(parts, fmt.Sprintf("ENGINE = %s(%s)", resource.Engine, engineParamsStr))
@@ -59,17 +52,13 @@ func buildCreateOnClusterSentence(resource TableResource) (query string) {
 		parts = append(parts, fmt.Sprintf("ENGINE = %s", resource.Engine))
 	}
 	
-	// Добавляем ORDER BY если указан
 	if len(resource.OrderBy) > 0 {
 		parts = append(parts, buildOrderBySentence(resource.OrderBy))
 	}
-	
-	// Добавляем PARTITION BY если указан
 	if len(resource.PartitionBy) > 0 {
 		parts = append(parts, buildPartitionBySentence(resource.PartitionBy))
 	}
-	
-	// Добавляем COMMENT
+
 	parts = append(parts, fmt.Sprintf("COMMENT '%s'", resource.Comment))
 
 	return strings.Join(parts, " ")

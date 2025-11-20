@@ -193,7 +193,6 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	tableResource.Name = d.Get("name").(string)
 	tableResource.Engine = d.Get("engine").(string)
 	
-	// Безопасная обработка опциональных полей
 	commentRaw := d.Get("comment")
 	commentStr := ""
 	if commentRaw != nil {
@@ -201,7 +200,6 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 	}
 	tableResource.Comment = common.GetComment(commentStr, tableResource.Cluster)
 	
-	// Обработка columns
 	columnRaw := d.Get("column")
 	if columnRaw != nil {
 		if columnList, ok := columnRaw.([]interface{}); ok {
@@ -213,7 +211,6 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		tableResource.Columns = []interface{}{}
 	}
 	
-	// Обработка engine_params
 	engineParamsRaw := d.Get("engine_params")
 	if engineParamsRaw != nil {
 		if engineParamsList, ok := engineParamsRaw.([]interface{}); ok {
@@ -225,7 +222,6 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		tableResource.EngineParams = []string{}
 	}
 	
-	// order_by - упрощенная обработка опционального поля
 	orderByRaw := d.Get("order_by")
 	if orderByRaw != nil {
 		if orderByList, ok := orderByRaw.([]interface{}); ok && len(orderByList) > 0 {
@@ -237,7 +233,6 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		tableResource.OrderBy = []string{}
 	}
 	
-	// partition_by - безопасная обработка опционального поля
 	partitionByRaw := d.Get("partition_by")
 	if partitionByRaw != nil {
 		if partitionByList, ok := partitionByRaw.([]interface{}); ok {
@@ -258,12 +253,10 @@ func resourceTableCreate(ctx context.Context, d *schema.ResourceData, meta any) 
 		return diags
 	}
 
-	// Формируем SQL запрос
 	query := buildCreateOnClusterSentence(tableResource)
 	err := chTableService.CreateTable(ctx, tableResource)
 
 	if err != nil {
-		// В случае ошибки включаем SQL запрос в сообщение для отладки
 		return diag.FromErr(fmt.Errorf("creating table failed. SQL: %s, error: %v", query, err))
 	}
 
