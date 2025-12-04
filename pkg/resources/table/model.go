@@ -70,7 +70,7 @@ func (t *CHTable) ToResource() (*TableResource, error) {
 		Columns:    t.ColumnsToResource(),
 	}
 
-	r, _ := regexp.Compile("MergeTree\\((?P<engine_params>[^)]*)\\)")
+	r, _ := regexp.Compile(`MergeTree\((?P<engine_params>[^)]*)\)`)
 	matches := r.FindStringSubmatch(t.EngineFull)
 	engineParamsIndex := r.SubexpIndex("engine_params")
 	engineParams := make([]string, 0)
@@ -78,9 +78,7 @@ func (t *CHTable) ToResource() (*TableResource, error) {
 
 		regex := regexp.MustCompile("[, ]+")
 		params := regex.Split(matches[r.SubexpIndex("engine_params")], -1)
-		for _, p := range params {
-			engineParams = append(engineParams, p)
-		}
+		engineParams = append(engineParams, params...)
 	}
 
 	comment, cluster, err := common.UnmarshalComment(t.Comment)
@@ -180,7 +178,7 @@ func (t *TableResource) Validate(diags diag.Diagnostics) {
 
 func (t *TableResource) validateOrderBy(diags diag.Diagnostics) {
 	for _, orderField := range t.OrderBy {
-		if t.HasColumn(orderField) == false {
+		if !t.HasColumn(orderField) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "wrong value",
@@ -192,7 +190,7 @@ func (t *TableResource) validateOrderBy(diags diag.Diagnostics) {
 
 func (t *TableResource) validatePartitionBy(diags diag.Diagnostics) {
 	for _, partitionBy := range t.PartitionBy {
-		if t.HasColumn(partitionBy.By) == false {
+		if !t.HasColumn(partitionBy.By) {
 			diags = append(diags, diag.Diagnostic{
 				Severity: diag.Error,
 				Summary:  "wrong value",
