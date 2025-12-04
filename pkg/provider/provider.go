@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"crypto/tls"
-	"errors"
 	"fmt"
 	"os"
 
@@ -112,7 +111,7 @@ func getEnvVar(envVarName string) (any, error) {
 	if v := os.Getenv(envVarName); v != "" {
 		return v, nil
 	}
-	return nil, errors.New(fmt.Sprintf("Env var %v not present", envVarName))
+	return nil, fmt.Errorf("Env var %v not present", envVarName)
 
 }
 
