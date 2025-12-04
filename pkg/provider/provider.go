@@ -38,7 +38,7 @@ func New(version string) func() *schema.Provider {
 	return func() *schema.Provider {
 		p := &schema.Provider{
 			Schema: map[string]*schema.Schema{
-				"default_cluster": &schema.Schema{
+				"default_cluster": {
 					Description: "Default cluster, if provided will be used when no cluster is provided",
 					Type:        schema.TypeString,
 					Optional:    true,
@@ -111,7 +111,7 @@ func getEnvVar(envVarName string) (any, error) {
 	if v := os.Getenv(envVarName); v != "" {
 		return v, nil
 	}
-	return nil, fmt.Errorf("Env var %v not present", envVarName)
+	return nil, fmt.Errorf("env var %v not present", envVarName)
 
 }
 
