@@ -270,7 +270,7 @@ func (t *CHTable) ToPostgreSQLResource() (*PostgreSQLTableResource, error) {
 
 	comment, _, err := common.UnmarshalComment(t.Comment)
 	if err != nil {
-		return nil, err
+		comment = strings.TrimSpace(t.Comment)
 	}
 	tableResource.Comment = comment
 
